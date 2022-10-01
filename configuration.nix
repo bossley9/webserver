@@ -124,11 +124,33 @@ in
   security.acme.defaults.email = variables.email;
   services.nginx = {
     enable = true;
+    recommendedGzipSettings = true;
+    recommendedOptimisation = true;
+    recommendedTlsSettings = true;
     virtualHosts = {
       "${variables.domain}" = {
         forceSSL = true;
         enableACME = true;
         root = "/var/www/${variables.domain}";
+        extraConfig = ''
+          # security headers
+          location / {
+            add_header X-Frame-Options "sameorigin";
+            add_header X-XSS-Protection "1";
+            add_header X-Content-Type-Options "nosniff";
+            add_header X-Permitted-Cross-Domain-Policies "none";
+            add_header Strict-Transport-Security "max-age=31536000";
+            add_header Content-Security-Policy "default-src * data:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'";
+            add_header Referrer-Policy "no-referrer-when-downgrade";
+            add_header Feature-Policy "camera 'none'; fullscreen 'self'; geolocation 'none'; microphone 'none'";
+          }
+
+          # static asset caching
+          location ~* .(?:css|js|woff)$ {
+            expires 1y;
+            add_header Cache-Control "public, no-transform";
+          }
+        '';
       };
     };
   };
