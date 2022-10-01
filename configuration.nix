@@ -8,6 +8,8 @@ let
     ethInterface = "enp1s0";
     email = "bossley.samuel@gmail.com";
     domain = "sam.bossley.us";
+    hostname = "webserver";
+    userHome = /home/nixos;
   };
 
 in
@@ -28,7 +30,7 @@ in
   # networking {{{
   networking.useDHCP = false; # False recommended for security
   networking.interfaces.${variables.ethInterface}.useDHCP = true;
-  networking.hostName = "webserver";
+  networking.hostName = variables.hostname;
   # }}}
 
   # localization {{{
@@ -47,7 +49,7 @@ in
     isNormalUser = true;
     initialPassword = "test1234!";
     extraGroups = [ "wheel" ];
-    home = (builtins.toString userHome);
+    home = (builtins.toString variables.userHome);
     openssh.authorizedKeys.keys = lib.strings.splitString "\n" (builtins.readFile ./keys.pub);
   };
 
