@@ -57,6 +57,7 @@ in
   environment.defaultPackages = lib.mkForce []; # Remove default packages for security
   environment.systemPackages = with pkgs; [
     vim git
+    rsync
   ];
 
   environment.shellInit = ''
