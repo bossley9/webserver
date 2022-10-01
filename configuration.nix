@@ -8,7 +8,7 @@ let
     ethInterface = "enp1s0";
     email = "bossley.samuel@gmail.com";
     domain = "sam.bossley.us";
-  }
+  };
 
 in
 {

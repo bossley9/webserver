@@ -11,6 +11,7 @@ My website server NixOS configuration
     mkdir ~/.ssh
     # for Sourcehut keys
     curl -L https://meta.sr.ht/~YOUR_USERNAME.keys > ~/.ssh/authorized_keys
+    cat ~/.ssh/authorized_keys # sanity check
     ```
     The following steps can now be performed via SSH (`ssh nixos@MY_IP_ADDRESS`).
 4. Log into root and set up packages.
@@ -20,6 +21,7 @@ My website server NixOS configuration
     set -o vi
 5. Partition the disk, where the swap is the same size as allocated RAM. MBR partitioning is required or the VPS may not recognize any bootable partitions.
     ```sh
+    fdisk -l # sanity check
     parted /dev/vda -- mklabel msdos
     parted /dev/vda -- mkpart primary 1MB -1GB
     parted /dev/vda -- mkpart primary linux-swap -1GB 100%
