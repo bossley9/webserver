@@ -10,6 +10,7 @@ let
     domain = "sam.bossley.us";
     hostname = "webserver";
     userHome = /home/nixos;
+    rsyncPort = 873;
   };
 
 in
@@ -91,6 +92,7 @@ in
     allowedTCPPorts = [
       22 # OpenSSH (automatically allowed but explicitly adding for sanity)
       80 443 # HTTP and HTTPS
+      variables.rsyncPort
     ];
   };
   # }}}
@@ -128,6 +130,13 @@ in
         root = "/var/www/${variables.domain}";
       };
     };
+  };
+  # }}}
+
+  # syncing {{{
+  services.rsyncd = {
+    enable = true;
+    port = variables.rsyncPort;
   };
   # }}}
 
