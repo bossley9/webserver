@@ -119,6 +119,21 @@ in
     recommendedOptimisation = true;
     recommendedTlsSettings = true;
     virtualHosts = {
+      "www.bossley.us" = {
+        forceSSL = true;
+        enableACME = true;
+        globalRedirect = "sam.bossley.us";
+      };
+      "bossley.us" = {
+        forceSSL = true;
+        enableACME = true;
+        globalRedirect = "sam.bossley.us";
+      };
+      "www.sam.bossley.us" = {
+        forceSSL = true;
+        enableACME = true;
+        globalRedirect = "sam.bossley.us";
+      };
       "sam.bossley.us" = {
         forceSSL = true;
         enableACME = true;
