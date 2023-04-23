@@ -1,6 +1,3 @@
-# See configuration.nix(5) for more information.
-# vim: fdm=marker
-
 { config, pkgs, lib, ... }:
 
 let
@@ -12,29 +9,29 @@ let
     userHome = /home/nixos;
     rsyncPort = 873;
   };
-
 in
 {
   imports = [
     ./hardware-configuration.nix
   ];
 
-  # boot {{{
-  boot.loader.grub = {
-    enable = true;
-    version = 2;
-    device = "/dev/vda";
+  nix.allowedUsers = [ "@wheel" ];
+
+  boot.loader = {
+    grub = {
+      enable = true;
+      version = 2;
+      device = "/dev/vda";
+    };
+    timeout = 2;
   };
-  boot.loader.timeout = 2;
-  # }}}
 
-  # networking {{{
-  networking.useDHCP = false; # False recommended for security
-  networking.interfaces.${variables.ethInterface}.useDHCP = true;
-  networking.hostName = variables.hostname;
-  # }}}
+  networking = {
+    hostName = variables.hostname;
+    useDHCP = false; # False recommended for security
+    interfaces.${variables.ethInterface}.useDHCP = true;
+  };
 
-  # localization {{{
   services.timesyncd.enable = true;
   time.timeZone = "America/Los_Angeles";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -42,9 +39,7 @@ in
     font = "Lat2-Terminus16";
     keyMap = "us";
   };
-  # }}}
 
-  # user space {{{
   users.mutableUsers = false;
   users.users.nixos = {
     isNormalUser = true;
@@ -53,34 +48,32 @@ in
     home = (builtins.toString variables.userHome);
     openssh.authorizedKeys.keys = lib.strings.splitString "\n" (builtins.readFile ./keys.pub);
   };
-
-  environment.defaultPackages = lib.mkForce []; # Remove default packages for security
+  environment.defaultPackages = lib.mkForce [ ]; # Remove default packages for security
   environment.systemPackages = with pkgs; [
-    vim git
+    vim
+    git
     rsync
   ];
-
   environment.shellInit = ''
     umask 0077
   '';
-  # }}}
 
-  # security and access {{{
-  security.sudo.enable = false;
-  security.doas = {
-    enable = true;
-    extraRules = [
-      { groups = [ "wheel" ]; noPass = true; keepEnv = true; }
-    ];
+  security = {
+    sudo.enable = false;
+    doas = {
+      enable = true;
+      extraRules = [
+        { groups = [ "wheel" ]; noPass = true; keepEnv = true; }
+      ];
+    };
+    lockKernelModules = true; # Disable loading kernel modules after boot
   };
-  nix.allowedUsers = [ "@wheel" ];
-  security.lockKernelModules = true; # Disable loading kernel modules after boot
 
   services.openssh = {
     enable = true;
-    permitRootLogin = "no";
-    passwordAuthentication = false;
     allowSFTP = false;
+    passwordAuthentication = false;
+    permitRootLogin = "no";
     forwardX11 = false;
     extraConfig = ''
       AuthenticationMethods publickey
@@ -88,25 +81,13 @@ in
   };
   services.sshguard.enable = true;
 
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [
-      22 # OpenSSH (automatically allowed but explicitly adding for sanity)
-      80 443 # HTTP and HTTPS
-      variables.rsyncPort
-    ];
-  };
-  # }}}
-
-  # optimization {{{
   # Automatically garbage collect nix
   nix.gc = {
     automatic = true;
     dates = "weekly";
   };
   # Reduce systemd journaling
-  services.journald.extraConfig =
-  ''
+  services.journald.extraConfig = ''
     SystemMaxUse=250M
     MaxRetentionSec=7day
   '';
@@ -117,11 +98,20 @@ in
       "0 3 * * 0 root reboot"
     ];
   };
-  # }}}
 
-  # webserver {{{
-  security.acme.acceptTerms = true;
-  security.acme.defaults.email = variables.email;
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      22 # OpenSSH (automatically allowed but explicitly adding for sanity)
+      80 # HTTP
+      443 # HTTPS
+      variables.rsyncPort # Rsync
+    ];
+  };
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = variables.email;
+  };
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
@@ -154,27 +144,11 @@ in
       };
     };
   };
-  # }}}
 
-  # syncing {{{
   services.rsyncd = {
     enable = true;
     port = variables.rsyncPort;
   };
-  # }}}
 
-  # required {{{
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "22.05"; # Did you read the comment?
-  # }}}
+  system.stateVersion = "22.05"; # required
 }
