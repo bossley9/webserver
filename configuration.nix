@@ -139,6 +139,7 @@ in
         enableACME = true;
         root = "/var/www/sam.bossley.us";
         extraConfig = ''
+          error_page 400 401 402 403 404 429 /404.html;
           # security headers
           location / {
             add_header X-Frame-Options "sameorigin";
