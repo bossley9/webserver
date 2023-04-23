@@ -45,12 +45,17 @@ in
   };
   environment.defaultPackages = lib.mkForce [ ]; # Remove default packages for security
   environment.systemPackages = with pkgs; [
-    vim
+    neovim
     git
     rsync
   ];
   environment.shellInit = ''
     umask 0077
+  '';
+  programs.bash.shellInit = ''
+    set -o vi
+    alias vim="nvim"
+    alias nrs="doas nixos-rebuild switch --flake .#"
   '';
 
   security = {
