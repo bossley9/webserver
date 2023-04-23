@@ -15,7 +15,10 @@ in
     ./hardware-configuration.nix
   ];
 
-  nix.allowedUsers = [ "@wheel" ];
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    allowed-users = [ "@wheel" ];
+  };
 
   boot.loader = {
     grub = {
@@ -72,9 +75,10 @@ in
   services.openssh = {
     enable = true;
     allowSFTP = false;
-    passwordAuthentication = false;
-    permitRootLogin = "no";
-    forwardX11 = false;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
     extraConfig = ''
       AuthenticationMethods publickey
     '';
