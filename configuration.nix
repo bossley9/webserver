@@ -1,14 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  variables = {
-    ethInterface = "enp1s0";
-    email = "bossley.samuel@gmail.com";
-    domain = "sam.bossley.us";
-    hostname = "webserver";
-    userHome = /home/nixos;
-    rsyncPort = 873;
-  };
+  email = "bossley.samuel@gmail.com";
 in
 {
   imports = [
@@ -30,9 +23,9 @@ in
   };
 
   networking = {
-    hostName = variables.hostname;
+    hostName = "webserver";
     useDHCP = false; # False recommended for security
-    interfaces.${variables.ethInterface}.useDHCP = true;
+    interfaces.enp1s0.useDHCP = true;
   };
 
   services.timesyncd.enable = true;
@@ -48,7 +41,6 @@ in
     isNormalUser = true;
     initialPassword = "test1234!";
     extraGroups = [ "wheel" ];
-    home = (builtins.toString variables.userHome);
     openssh.authorizedKeys.keys = lib.strings.splitString "\n" (builtins.readFile ./keys.pub);
   };
   environment.defaultPackages = lib.mkForce [ ]; # Remove default packages for security
@@ -109,12 +101,12 @@ in
       22 # OpenSSH (automatically allowed but explicitly adding for sanity)
       80 # HTTP
       443 # HTTPS
-      variables.rsyncPort # Rsync
+      873 # Rsync
     ];
   };
   security.acme = {
     acceptTerms = true;
-    defaults.email = variables.email;
+    defaults.email = email;
   };
   services.nginx = {
     enable = true;
@@ -122,10 +114,10 @@ in
     recommendedOptimisation = true;
     recommendedTlsSettings = true;
     virtualHosts = {
-      "${variables.domain}" = {
+      "sam.bossley.us" = {
         forceSSL = true;
         enableACME = true;
-        root = "/var/www/${variables.domain}";
+        root = "/var/www/sam.bossley.us";
         extraConfig = ''
           # security headers
           location / {
@@ -151,7 +143,7 @@ in
 
   services.rsyncd = {
     enable = true;
-    port = variables.rsyncPort;
+    port = 873;
   };
 
   system.stateVersion = "22.05"; # required
