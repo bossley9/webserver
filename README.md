@@ -9,8 +9,7 @@ My website server NixOS configuration
 3. Log into the web console and copy over ssh keys to perform the rest of the installation via ssh.
     ```sh
     mkdir ~/.ssh
-    # for Sourcehut keys
-    curl -L https://meta.sr.ht/~YOUR_USERNAME.keys > ~/.ssh/authorized_keys
+    curl -L https://github.com/YOUR_USERNAME.keys > ~/.ssh/authorized_keys
     cat ~/.ssh/authorized_keys # sanity check
     ```
     The following steps can now be performed via SSH (`ssh nixos@MY_IP_ADDRESS`).
@@ -23,8 +22,8 @@ My website server NixOS configuration
     ```sh
     fdisk -l # sanity check
     parted /dev/vda -- mklabel msdos
-    parted /dev/vda -- mkpart primary 1MB -1GB
-    parted /dev/vda -- mkpart primary linux-swap -1GB 100%
+    parted /dev/vda -- mkpart primary 1MB -2GB
+    parted /dev/vda -- mkpart primary linux-swap -2GB 100%
     ```
 6. Format each partition. I recommend ext4 over btrfs because a VPS generally doesn't need CoW or snapshot features, and ext4 is slightly faster and uses less storage.
     ```sh
@@ -37,16 +36,8 @@ My website server NixOS configuration
     ```sh
     nixos-generate-config --root /mnt
     ```
-8. Clone this configuration and move files into the appropriate locations.
-    ```sh
-    git clone https://git.sr.ht/~bossley9/webserver nixos
-    mv /mnt/etc/nixos/hardware-configuration.nix nixos/
-    # NOTE: be sure to disable virtualization capabilities within a VPS
-    # via "virtualisation.hypervGuest.enable" in the hardware configuration
-    rm -r /mnt/etc/nixos
-    mv nixos /mnt/etc/
-    ```
-9. Copy SSH public keys for server access. If you do not do this, you will be locked out of the server.
+8. Copy this configuration and move files into the appropriate locations. Be sure to double check the hardware configuration for discrepancies.
+9. Copy SSH public keys for server access. **If you do not do this, you will be locked out of the server.**
     ```sh
     cp /home/nixos/.ssh/authorized_keys /mnt/etc/nixos/keys.pub
     ```
