@@ -153,7 +153,7 @@ in
           }
 
           # static asset caching
-          location ~* .(?:css|js|woff)$ {
+          location ~* .(?:css|jpg|js|png|webp|woff)$ {
             expires 1y;
             add_header Cache-Control "public, no-transform";
           }
