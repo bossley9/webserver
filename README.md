@@ -1,4 +1,6 @@
-# webserver
+# webserver (deprecated)
+
+⚠️ This repository has been merged with [my website](https://github.com/bossley9/website).
 
 My website server NixOS configuration
 
